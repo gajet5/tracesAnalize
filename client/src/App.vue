@@ -47,6 +47,9 @@
               <vue-upload-component
                 class="v-btn teal"
                 v-model="files"
+                :size="1024 * 1024 * 10"
+                ref="upload"
+                post-action="http://10.16.82.105:5000/"
               >
                 <div class="v-btn__content fill-height">
                   Select file
@@ -56,8 +59,16 @@
                 color="teal"
                 dark
                 :disabled="uploadBtnStatus"
+                @click.prevent="$refs.upload.active = true"
               >
                 Start
+              </v-btn>
+              <v-btn
+                color="error"
+                v-show="cancelBtnStatus"
+                @click.prevent="$refs.upload.active = false"
+              >
+                Cancel
               </v-btn>
             </v-card-actions>
           </v-card>
@@ -199,9 +210,16 @@
     computed: {
       uploadBtnStatus() {
         try {
-          return !(this.files.length && /GUI\.log/.test(this.files[0].name) && this.files[0].size < 1e+8);
+          return !(this.files.length && /GUI\.log/.test(this.files[0].name) && !this.$refs.upload.active);
         } catch (e) {
-          return 'true!';
+          return true;
+        }
+      },
+      cancelBtnStatus() {
+        try {
+          return this.$refs.upload.active;
+        } catch (e) {
+          return false;
         }
       }
     }
