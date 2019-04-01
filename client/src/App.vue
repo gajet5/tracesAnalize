@@ -44,32 +44,42 @@
               <span class="white--text pr-3">
                 {{ files.length ? files[0].name : '' }}
               </span>
-              <vue-upload-component
-                class="v-btn teal"
-                v-model="files"
-                :size="1024 * 1024 * 10"
-                ref="upload"
-                post-action="http://10.16.82.105:5000/"
-              >
-                <div class="v-btn__content fill-height">
-                  Select file
-                </div>
-              </vue-upload-component>
-              <v-btn
-                color="teal"
-                dark
-                :disabled="uploadBtnStatus"
-                @click.prevent="$refs.upload.active = true"
-              >
-                Start
-              </v-btn>
-              <v-btn
-                color="error"
-                v-show="cancelBtnStatus"
-                @click.prevent="$refs.upload.active = false"
-              >
-                Cancel
-              </v-btn>
+              <template v-if="renewBtnStatus">
+                <vue-upload-component
+                  class="v-btn teal"
+                  v-model="files"
+                  :size="1024 * 1024 * 10"
+                  ref="upload"
+                  post-action="https://trace-reader.ru/"
+                >
+                  <div class="v-btn__content fill-height">
+                    Select file
+                  </div>
+                </vue-upload-component>
+                <v-btn
+                  color="teal"
+                  dark
+                  :disabled="uploadBtnStatus"
+                  @click.prevent="$refs.upload.active = true"
+                >
+                  Start
+                </v-btn>
+                <v-btn
+                  color="error"
+                  v-show="cancelBtnStatus"
+                  @click.prevent="$refs.upload.active = false"
+                >
+                  Cancel
+                </v-btn>
+              </template>
+              <template v-else>
+                <v-btn
+                  color="warning"
+                  @click="clearFiles"
+                >
+                  Upload new file
+                </v-btn>
+              </template>
             </v-card-actions>
           </v-card>
         </v-flex>
@@ -78,7 +88,7 @@
         <v-flex xs12>
           <v-data-table
             :headers="headers"
-            :items="desserts"
+            :items="tracesLog"
             class="elevation-1"
             :rows-per-page-items="[20, 30, 50, { 'text': '$vuetify.dataIterator.rowsPerPageAll', 'value': -1 }]"
           >
@@ -86,6 +96,12 @@
               <td>{{ props.item.type }}</td>
               <td>{{ props.item.time }}</td>
               <td>{{ props.item.actions }}</td>
+            </template>
+
+            <template v-slot:no-data>
+              <v-alert :value="true" color="error" icon="warning">
+                Sorry, nothing to display here :(
+              </v-alert>
             </template>
           </v-data-table>
         </v-flex>
@@ -122,88 +138,6 @@
             value: 'actions',
             sortable: false
           }
-        ],
-        desserts: [
-          {
-            type: 'ClickEvent',
-            time: '10:50:41.371',
-            actions: '[MainWindow].[FooterIconButton LOC:Settings Command:ShowSettingsCommand]'
-          },
-          {
-            type: 'PageNavigationEvent',
-            time: '10:50:41.379',
-            actions: 'KasperskyLab.Kis.UI.Settings.View.SettingsPage'
-          },
-          {
-            type: 'ClickEvent',
-            time: '10:50:41.371',
-            actions: '[MainWindow].[FooterIconButton LOC:Settings Command:ShowSettingsCommand]'
-          },
-          {
-            type: 'PageNavigationEvent',
-            time: '10:50:41.379',
-            actions: 'KasperskyLab.Kis.UI.Settings.View.SettingsPage'
-          },
-          {
-            type: 'ClickEvent',
-            time: '10:50:41.371',
-            actions: '[MainWindow].[FooterIconButton LOC:Settings Command:ShowSettingsCommand]'
-          },
-          {
-            type: 'PageNavigationEvent',
-            time: '10:50:41.379',
-            actions: 'KasperskyLab.Kis.UI.Settings.View.SettingsPage'
-          },
-          {
-            type: 'ClickEvent',
-            time: '10:50:41.371',
-            actions: '[MainWindow].[FooterIconButton LOC:Settings Command:ShowSettingsCommand]'
-          },
-          {
-            type: 'PageNavigationEvent',
-            time: '10:50:41.379',
-            actions: 'KasperskyLab.Kis.UI.Settings.View.SettingsPage'
-          },
-          {
-            type: 'ClickEvent',
-            time: '10:50:41.371',
-            actions: '[MainWindow].[FooterIconButton LOC:Settings Command:ShowSettingsCommand]'
-          },
-          {
-            type: 'PageNavigationEvent',
-            time: '10:50:41.379',
-            actions: 'KasperskyLab.Kis.UI.Settings.View.SettingsPage'
-          },
-          {
-            type: 'ClickEvent',
-            time: '10:50:41.371',
-            actions: '[MainWindow].[FooterIconButton LOC:Settings Command:ShowSettingsCommand]'
-          },
-          {
-            type: 'PageNavigationEvent',
-            time: '10:50:41.379',
-            actions: 'KasperskyLab.Kis.UI.Settings.View.SettingsPage'
-          },
-          {
-            type: 'ClickEvent',
-            time: '10:50:41.371',
-            actions: '[MainWindow].[FooterIconButton LOC:Settings Command:ShowSettingsCommand]'
-          },
-          {
-            type: 'PageNavigationEvent',
-            time: '10:50:41.379',
-            actions: 'KasperskyLab.Kis.UI.Settings.View.SettingsPage'
-          },
-          {
-            type: 'ClickEvent',
-            time: '10:50:41.371',
-            actions: '[MainWindow].[FooterIconButton LOC:Settings Command:ShowSettingsCommand]'
-          },
-          {
-            type: 'PageNavigationEvent',
-            time: '10:50:41.379',
-            actions: 'KasperskyLab.Kis.UI.Settings.View.SettingsPage'
-          }
         ]
       };
     },
@@ -217,10 +151,39 @@
       },
       cancelBtnStatus() {
         try {
-          return this.$refs.upload.active;
+          return this.files[0].active;
         } catch (e) {
           return false;
         }
+      },
+      renewBtnStatus() {
+        try {
+          return !Object.keys(this.files[0].response).length;
+        } catch (e) {
+          return true;
+        }
+      },
+      tracesLog() {
+        try {
+          let result = [];
+          
+          for (let item of this.files[0].response.lines) {
+            result.push({
+              type: item.type,
+              time: item.time,
+              actions: item.text
+            });
+          }
+          
+          return result;
+        } catch (e) {
+          return [];
+        }
+      }
+    },
+    methods: {
+      clearFiles() {
+        this.files = [];
       }
     }
   };
