@@ -48,7 +48,7 @@
                 <vue-upload-component
                   class="v-btn teal"
                   v-model="files"
-                  :size="1024 * 1024 * 10"
+                  :size="1024 * 1024 * 100"
                   ref="upload"
                   post-action="https://trace-reader.ru/"
                 >
@@ -84,6 +84,15 @@
           </v-card>
         </v-flex>
       </v-layout>
+      <v-layout v-show="cancelBtnStatus">
+        <v-flex xs12>
+          <v-progress-linear
+            color="teal darken-2"
+            height="15"
+            :value="uploadProgress"
+          ></v-progress-linear>
+        </v-flex>
+      </v-layout>
       <v-layout class="mt-5">
         <v-flex xs12>
           <v-data-table
@@ -91,17 +100,38 @@
             :items="tracesLog"
             class="elevation-1"
             :rows-per-page-items="[20, 30, 50, { 'text': '$vuetify.dataIterator.rowsPerPageAll', 'value': -1 }]"
+            expand
+            item-key="index"
+            ref="dTable"
           >
             <template v-slot:items="props">
-              <td>{{ props.item.type }}</td>
-              <td>{{ props.item.time }}</td>
-              <td>{{ props.item.actions }}</td>
+              <tr @click="props.expanded = !props.expanded">
+                <td>{{ props.item.type }}</td>
+                <td>{{ props.item.time }}</td>
+                <td>{{ props.item.actions }}</td>
+              </tr>
             </template>
 
             <template v-slot:no-data>
               <v-alert :value="true" color="error" icon="warning">
                 Sorry, nothing to display here :(
               </v-alert>
+            </template>
+
+            <template v-slot:expand="props">
+              <v-card flat>
+                <v-card-text>
+                  <v-alert
+                    :value="true"
+                    color="info"
+                    icon="info"
+                    outline
+                  >
+                    <b>Source line: </b>
+                    {{ props.item.line }}
+                  </v-alert>
+                </v-card-text>
+              </v-card>
             </template>
           </v-data-table>
         </v-flex>
@@ -166,12 +196,17 @@
       tracesLog() {
         try {
           let result = [];
+          let index = 0;
           
           for (let item of this.files[0].response.lines) {
+            index += 1;
+
             result.push({
+              index,
               type: item.type,
               time: item.time,
-              actions: item.text
+              actions: item.text,
+              line: item.line
             });
           }
           
@@ -179,10 +214,18 @@
         } catch (e) {
           return [];
         }
+      },
+      uploadProgress() {
+        try {
+          return this.files[0].progress;
+        } catch (e) {
+          return 0;
+        }
       }
     },
     methods: {
       clearFiles() {
+        this.$refs.dTable.expanded = {};
         this.files = [];
       }
     }
