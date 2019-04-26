@@ -32,7 +32,7 @@
                     color="amber darken-3"
                     icon="info"
                   >
-                    Only interface logs are suitable for download.
+                    Download only GUI logs.
                   </v-alert>
                 </div>
               </v-flex>
@@ -50,7 +50,7 @@
                   v-model="files"
                   :size="1024 * 1024 * 100"
                   ref="upload"
-                  post-action="https://trace-reader.ru/"
+                  post-action="http://localhost:4321/upload"
                 >
                   <div class="v-btn__content fill-height">
                     Select file
