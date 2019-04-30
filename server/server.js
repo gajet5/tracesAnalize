@@ -4,6 +4,7 @@ const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
+const config = require(path.join(__basedir, 'config'));
 
 const server = express();
 
@@ -16,6 +17,6 @@ const uploadRouter = require(path.join(__basedir, 'routers', 'upload'));
 server.use('/', indexRouter);
 server.use('/upload', uploadRouter);
 
-server.listen(4321, () => {
-    console.log('http://localhost:4321/');
+server.listen(config.server.port, () => {
+    console.log(`http://localhost:${config.server.port}/`);
 });

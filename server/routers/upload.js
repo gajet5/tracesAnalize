@@ -4,6 +4,7 @@ const router = Router();
 
 const uploadController = require(path.join(__basedir, 'controllers', 'upload'));
 
-router.post('/', uploadController);
+router.post('/traces', uploadController.traces);
+router.post('/vocabulary', uploadController.vocabulary);
 
 module.exports = router;
