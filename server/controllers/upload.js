@@ -43,20 +43,25 @@ module.exports = {
     async vocabulary(req, res) {
         const form = await formFactory('uploadsVocabularyDir');
 
-        form.parse(req, (err, fields, { file }) => {
-            console.log('parse');
-        });
 
-        form.on('file', (name, file) => {
-            console.log('file');
-        });
-
-        form.on('end', async () => {
-            res.json({
-                status: 'OK',
-                files: await vocabularyParser()
+        form
+            .on('error', (err) => {
+                res.json({
+                    error: err
+                });
+            })
+            .on('file', async (name, file) => {
+                await fs.rename(file.path, path.join(form.uploadDir, file.name));
+                console.log('Time file: ', Date.now());
+            })
+            .on('end', () => {
+                console.log('Time end: ', Date.now());
+                res.json({
+                    status: 'OK',
+                    id: Math.round(Math.random() * 1000)
+                });
             });
-            console.log('end');
-        });
+
+        form.parse(req);
     }
 };

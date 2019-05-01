@@ -7,8 +7,8 @@ module.exports = async () => {
     const zipFile = path.join(config.server.uploadsVocabularyDir, 'resources.zip');
     const unzipPath = path.join(config.server.uploadsVocabularyDir, '_tmp');
 
-    await fs.ensureDir(unzipPath);
     await fs.ensureDir(config.server.uploadsDir);
+    await fs.ensureDir(unzipPath);
 
     if (!await unpack(zipFile, unzipPath)) {
         console.log('Ошибка при распаковке архива.');

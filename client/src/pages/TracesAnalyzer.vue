@@ -50,7 +50,7 @@
                 v-model="files"
                 :size="1024 * 1024 * 100"
                 ref="upload"
-                :post-action="url"
+                :post-action="uploadUrl"
               >
                 <div class="v-btn__content fill-height">
                   Select file
@@ -135,16 +135,15 @@
 
 <script>
   import VueUploadComponent from 'vue-upload-component';
+  import config from '@/config';
 
   export default {
-    name: 'app',
+    name: 'TracesAnalyzer',
     components: {
       VueUploadComponent
     },
     data() {
       return {
-        url: 'http://localhost:4321/upload/traces',
-        request: null,
         files: [],
         headers: [
           {
@@ -166,6 +165,9 @@
       };
     },
     computed: {
+      uploadUrl() {
+        return `${config.url}traces`;
+      },
       uploadBtnStatus() {
         try {
           return !(this.files.length && /GUI\.log/.test(this.files[0].name) && !this.$refs.upload.active);
