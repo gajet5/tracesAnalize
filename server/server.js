@@ -5,6 +5,7 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const config = require(path.join(__basedir, 'config'));
+const { connection } = require(path.join(__basedir, 'services', 'db.js'));
 
 const server = express();
 
@@ -17,6 +18,9 @@ const uploadRouter = require(path.join(__basedir, 'routers', 'upload'));
 server.use('/', indexRouter);
 server.use('/upload', uploadRouter);
 
-server.listen(config.server.port, () => {
-    console.log(`http://localhost:${config.server.port}/`);
+connection.once('open', () => {
+    console.log('Connected to MongoDB');
+    server.listen(config.server.port, () => {
+        console.log(`http://localhost:${config.server.port}`);
+    });
 });

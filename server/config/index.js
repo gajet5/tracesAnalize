@@ -16,5 +16,8 @@ module.exports = {
             user: '',
             password: ''
         }
+    },
+    regexp: {
+        vocabulary: /([\w]+) *= *'([\w ]+)\.?:?'/
     }
 };
