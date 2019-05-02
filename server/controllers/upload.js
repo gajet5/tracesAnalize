@@ -2,7 +2,7 @@ const path = require('path');
 const formidable = require('formidable');
 const fs = require('fs-extra');
 const config = require(path.join(__basedir, 'config'));
-const vocabularyParser = require(path.join(__basedir, 'services', 'vocabularyParser'));
+// const vocabularyParser = require(path.join(__basedir, 'services', 'vocabularyParser'));
 
 async function formFactory(uploadsDirName) {
     const form = new formidable.IncomingForm();
@@ -23,26 +23,30 @@ module.exports = {
     async traces(req, res) {
         const form = await formFactory('uploadsTracesDir');
 
-        form.parse(req, (err, fields, { file }) => {
-            console.log('parse');
-        });
-
-        form.on('file', (name, file) => {
-            console.log('file');
-        });
-
-        form.on('end', () => {
-            console.log('end');
-            res.json({
-                status: 'OK'
+        form
+            .on('error', (err) => {
+                res.json({
+                    error: err
+                });
+            })
+            .on('file', async (name, file) => {
+                await fs.rename(file.path, path.join(form.uploadDir, file.name));
+                console.log('Time file: ', Date.now());
+            })
+            .on('end', () => {
+                console.log('Time end: ', Date.now());
+                res.json({
+                    status: 'OK',
+                    id: Math.round(Math.random() * 1000)
+                });
             });
-        });
+
+        form.parse(req);
     },
 
     // POST /upload/vocabulary
     async vocabulary(req, res) {
         const form = await formFactory('uploadsVocabularyDir');
-
 
         form
             .on('error', (err) => {
