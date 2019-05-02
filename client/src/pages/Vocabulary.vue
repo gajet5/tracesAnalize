@@ -9,7 +9,7 @@
             <span class="white--text pr-3">
                 {{ files.length ? files[0].name : '' }}
               </span>
-            <template v-if="renewBtnStatus">
+            <template v-if="!responseStatus">
               <vue-upload-component
                 :drop="true"
                 class="v-btn teal"
@@ -26,7 +26,7 @@
                 color="teal"
                 dark
                 :disabled="uploadBtnStatus"
-                @click.prevent="$refs.upload.active = true"
+                @click.prevent="uploadFile"
               >
                 Start
               </v-btn>
@@ -58,6 +58,28 @@
         </v-card>
       </v-flex>
     </v-layout>
+    <v-layout class="mb-2" v-show="reportOfParsed && responseStatus">
+      <v-flex xs12>
+        <v-card>
+          <v-alert
+            class="ma-0"
+            :value="true"
+            color="amber darken-3"
+            icon="info"
+            outline
+          >
+            Files parsed.
+          </v-alert>
+        </v-card>
+      </v-flex>
+    </v-layout>
+    <v-layout class="mb-2" v-show="!reportOfParsed && responseStatus">
+      <v-flex xs12>
+        <v-card>
+          <v-progress-linear :indeterminate="true"></v-progress-linear>
+        </v-card>
+      </v-flex>
+    </v-layout>
     <v-layout>
       <v-flex xs12>
         <v-card>
@@ -74,6 +96,7 @@
 <script>
   import VueUploadComponent from 'vue-upload-component';
   import config from '@/config';
+  import infoApi from '@/services/info';
 
   export default {
     name: 'Vocabulary',
@@ -82,12 +105,13 @@
     },
     data() {
       return {
-        files: []
+        files: [],
+        reportOfParsed: false
       };
     },
     computed: {
       uploadUrl() {
-        return `${config.url}vocabulary`;
+        return `${config.url}upload/vocabulary`;
       },
       uploadBtnStatus() {
         try {
@@ -103,11 +127,11 @@
           return false;
         }
       },
-      renewBtnStatus() {
+      responseStatus() {
         try {
-          return !Object.keys(this.files[0].response).length;
+          return !!Object.keys(this.files[0].response).length;
         } catch (e) {
-          return true;
+          return false;
         }
       },
       uploadProgress() {
@@ -119,6 +143,27 @@
       }
     },
     methods: {
+      responseVocabulary() {
+        const interval = setInterval(() => {
+          if (this.responseStatus) {
+            this.getParseStatus(this.files[0].response.id);
+            clearInterval(interval);
+          }
+        }, 1000);
+      },
+      getParseStatus(id) {
+        const interval = setInterval(async () => {
+          const { status } = await infoApi.report(id);
+          if (status) {
+            this.reportOfParsed = status;
+            clearInterval(interval);
+          }
+        }, 1000);
+      },
+      uploadFile() {
+        this.$refs.upload.active = true;
+        this.responseVocabulary();
+      },
       clearFiles() {
         this.files = [];
       }

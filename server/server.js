@@ -14,9 +14,11 @@ server.use(morgan('tiny'));
 
 const indexRouter = require(path.join(__basedir, 'routers', 'index'));
 const uploadRouter = require(path.join(__basedir, 'routers', 'upload'));
+const infoRouter = require(path.join(__basedir, 'routers', 'info'));
 
 server.use('/', indexRouter);
 server.use('/upload', uploadRouter);
+server.use('/info', infoRouter);
 
 connection.once('open', () => {
     console.log('Connected to MongoDB');

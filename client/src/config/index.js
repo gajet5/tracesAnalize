@@ -1,3 +1,3 @@
 export default {
-  url: 'http://localhost:4321/upload/'
+  url: 'http://localhost:4321/'
 };

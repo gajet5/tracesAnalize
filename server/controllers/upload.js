@@ -76,7 +76,7 @@ module.exports = {
             .on('end', () => {
                 res.json({
                     status: 'OK',
-                    id: upload.id
+                    id: upload.report.id
                 });
             });
 

@@ -166,7 +166,7 @@
     },
     computed: {
       uploadUrl() {
-        return `${config.url}traces`;
+        return `${config.url}upload/traces`;
       },
       uploadBtnStatus() {
         try {
