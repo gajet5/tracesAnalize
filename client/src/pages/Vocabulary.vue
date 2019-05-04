@@ -85,7 +85,7 @@
         <v-card>
           <v-card-title>in dev</v-card-title>
           <v-card-text>
-            {{ $route.query }}
+            Dictionary Download Module
           </v-card-text>
         </v-card>
       </v-flex>
