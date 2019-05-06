@@ -5,8 +5,18 @@ Vue.use(Vuex);
 
 export const store = new Vuex.Store({
   strict: true,
-  state: {},
-  getters: {},
-  mutations: {},
+  state: {
+    bugForm: false
+  },
+  getters: {
+    bugForm(state) {
+      return state.bugForm;
+    }
+  },
+  mutations: {
+    setBugForm(state, payload) {
+      state.bugForm = payload;
+    }
+  },
   actions: {}
 });

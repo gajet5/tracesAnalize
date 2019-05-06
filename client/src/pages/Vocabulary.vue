@@ -1,5 +1,6 @@
 <template>
   <v-container>
+    <!--    todo: Если ipapi  будет работать нормально, можно эту заглушку убрать.-->
     <v-layout v-show="$route.query.action === 'upload'" class="mb-2">
       <v-flex xs12>
         <v-card color="teal darken-2" class="white--text">
@@ -83,7 +84,6 @@
     <v-layout>
       <v-flex xs12>
         <v-card>
-          <v-card-title>in dev</v-card-title>
           <v-card-text>
             Dictionary Download Module
           </v-card-text>
