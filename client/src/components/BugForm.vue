@@ -32,10 +32,16 @@
               :rules="[rules.length(5000), rules.required]"
             ></v-textarea>
           </v-form>
+          <v-alert
+            :value="infoAlert"
+            type="info"
+          >
+            Functional is in development.
+          </v-alert>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn flat color="success">Send</v-btn>
+          <v-btn flat color="success" @click="sendBugReport">Send</v-btn>
           <v-btn flat color="error" @click="closeForm">Close</v-btn>
         </v-card-actions>
       </v-card>
@@ -60,13 +66,18 @@
         rules: {
           length: len => v => (v || '').length <= len || `Invalid character length, required ${len}`,
           required: v => !!v || 'This field is required'
-        }
+        },
+        infoAlert: false
       };
     },
     methods: {
+      sendBugReport() {
+        this.infoAlert = true;
+      },
       closeForm() {
         this.$refs.bugForm.reset();
         this.$store.commit('setBugForm', false);
+        this.infoAlert = false;
       }
     }
   };

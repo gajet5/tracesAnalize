@@ -43,7 +43,7 @@
             <span class="white--text pr-3">
                 {{ files.length ? files[0].name : '' }}
               </span>
-            <template v-if="renewBtnStatus">
+            <template v-if="!responseStatus">
               <vue-upload-component
                 :drop="true"
                 class="v-btn teal"
@@ -60,7 +60,7 @@
                 color="teal"
                 dark
                 :disabled="uploadBtnStatus"
-                @click.prevent="$refs.upload.active = true"
+                @click.prevent="uploadFile"
               >
                 Start
               </v-btn>
@@ -92,23 +92,30 @@
         </v-card>
       </v-flex>
     </v-layout>
+    <v-layout class="mb-2" v-show="!reportIsParsed && responseStatus">
+      <v-flex xs12>
+        <v-card>
+          <v-progress-linear :indeterminate="true"></v-progress-linear>
+        </v-card>
+      </v-flex>
+    </v-layout>
     <v-layout class="mb-2">
       <v-flex xs12>
         <v-data-table
           :headers="headers"
-          :items="tracesLog"
+          :items="report"
           class="elevation-1"
           :rows-per-page-items="[20, 30, 50, { 'text': '$vuetify.dataIterator.rowsPerPageAll', 'value': -1 }]"
           expand
           item-key="index"
           ref="dTable"
-          v-show="tracesLog.length"
+          v-show="report.length"
         >
           <template v-slot:items="props">
             <tr @click="props.expanded = !props.expanded">
-              <td>{{ props.item.type }}</td>
+              <td>{{ props.item.event }}</td>
               <td>{{ props.item.time }}</td>
-              <td>{{ props.item.actions }}</td>
+              <td>{{ props.item.string }}</td>
             </tr>
           </template>
 
@@ -122,7 +129,7 @@
                   outline
                 >
                   <b>Source line: </b>
-                  {{ props.item.line }}
+                  {{ props.item.source }}
                 </v-alert>
               </v-card-text>
             </v-card>
@@ -136,6 +143,7 @@
 <script>
   import VueUploadComponent from 'vue-upload-component';
   import config from '@/config';
+  import infoApi from '@/services/info';
 
   export default {
     name: 'TracesAnalyzer',
@@ -147,8 +155,8 @@
         files: [],
         headers: [
           {
-            text: 'Type',
-            value: 'type',
+            text: 'Event',
+            value: 'event',
             sortable: false
           },
           {
@@ -157,11 +165,13 @@
             sortable: false
           },
           {
-            text: 'Actions',
-            value: 'actions',
+            text: 'String',
+            value: 'string',
             sortable: false
           }
-        ]
+        ],
+        reportIsParsed: false,
+        report: []
       };
     },
     computed: {
@@ -170,7 +180,7 @@
       },
       uploadBtnStatus() {
         try {
-          return !(this.files.length && /GUI\.log/.test(this.files[0].name) && !this.$refs.upload.active);
+          return !(this.files.length && /GUI.*\.log$/.test(this.files[0].name) && !this.$refs.upload.active);
         } catch (e) {
           return true;
         }
@@ -182,33 +192,11 @@
           return false;
         }
       },
-      renewBtnStatus() {
+      responseStatus() {
         try {
-          return !Object.keys(this.files[0].response).length;
+          return !!Object.keys(this.files[0].response).length;
         } catch (e) {
-          return true;
-        }
-      },
-      tracesLog() {
-        try {
-          let result = [];
-          let index = 0;
-
-          for (let item of this.files[0].response.lines) {
-            index += 1;
-
-            result.push({
-              index,
-              type: item.type,
-              time: item.time,
-              actions: item.text,
-              line: item.line
-            });
-          }
-
-          return result;
-        } catch (e) {
-          return [];
+          return false;
         }
       },
       uploadProgress() {
@@ -220,9 +208,51 @@
       }
     },
     methods: {
+      responseVocabulary() {
+        const interval = setInterval(() => {
+          if (this.responseStatus) {
+            this.getParseStatus(this.files[0].response.id);
+            clearInterval(interval);
+          }
+        }, 1000);
+      },
+      getParseStatus(id) {
+        const interval = setInterval(async () => {
+          const { status, reportTraces } = await infoApi.report(id);
+          if (status) {
+            this.reportIsParsed = status;
+            this.tracesLog(reportTraces);
+            clearInterval(interval);
+          }
+        }, 1000);
+      },
+      uploadFile() {
+        this.$refs.upload.active = true;
+        this.responseVocabulary();
+      },
       clearFiles() {
         this.$refs.dTable.expanded = {};
         this.files = [];
+        this.report = [];
+      },
+      tracesLog(reportTraces) {
+        try {
+          let index = 0;
+
+          for (let { event, time, string, source } of reportTraces) {
+            index += 1;
+
+            this.report.push({
+              index,
+              event,
+              time,
+              string,
+              source
+            });
+          }
+        } catch (e) {
+          this.report = [];
+        }
       }
     }
   };

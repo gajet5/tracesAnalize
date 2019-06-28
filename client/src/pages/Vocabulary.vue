@@ -74,7 +74,7 @@
         </v-card>
       </v-flex>
     </v-layout>
-    <v-layout class="mb-2" v-show="!reportOfParsed && responseStatus">
+    <v-layout class="mb-2" v-show="!reportIsParsed && responseStatus">
       <v-flex xs12>
         <v-card>
           <v-progress-linear :indeterminate="true"></v-progress-linear>
@@ -106,7 +106,7 @@
     data() {
       return {
         files: [],
-        reportOfParsed: false
+        reportIsParsed: false
       };
     },
     computed: {
@@ -155,7 +155,7 @@
         const interval = setInterval(async () => {
           const { status } = await infoApi.report(id);
           if (status) {
-            this.reportOfParsed = status;
+            this.reportIsParsed = status;
             clearInterval(interval);
           }
         }, 1000);

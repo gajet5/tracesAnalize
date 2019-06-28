@@ -1,3 +1,4 @@
+require('./services/fuse').beforeStart();
 global.__basedir = __dirname;
 
 const path = require('path');

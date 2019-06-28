@@ -9,7 +9,22 @@ const Reports = new Schema({
     parsed: {
         type: Boolean
     },
-    report: {}
+    report: [
+        {
+            time: {
+                type: String
+            },
+            event: {
+                type: String
+            },
+            string: {
+                type: String
+            },
+            source: {
+                type: String
+            }
+        }
+    ]
 });
 
 module.exports = mongoose.model('Reports', Reports);

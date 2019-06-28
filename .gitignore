@@ -116,3 +116,6 @@ typings/
 .next
 
 uploads/
+/client/src/config/index.js
+/client/dist/
+/server/config/index.js
